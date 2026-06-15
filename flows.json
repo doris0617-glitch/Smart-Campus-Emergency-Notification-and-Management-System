@@ -1,0 +1,452 @@
+[
+    {
+        "id": "44b97e77d42e5fa9",
+        "type": "tab",
+        "label": "Group16_final",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "7f62248de93d50f1",
+        "type": "mqtt in",
+        "z": "44b97e77d42e5fa9",
+        "name": "",
+        "topic": "final",
+        "qos": "0",
+        "datatype": "utf8",
+        "broker": "dddb1820327cb91a",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 330,
+        "y": 160,
+        "wires": [
+            [
+                "0f4e62f6b92e8a80"
+            ]
+        ]
+    },
+    {
+        "id": "0f4e62f6b92e8a80",
+        "type": "json",
+        "z": "44b97e77d42e5fa9",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 470,
+        "y": 160,
+        "wires": [
+            [
+                "59adc3476534c714"
+            ]
+        ]
+    },
+    {
+        "id": "59adc3476534c714",
+        "type": "function",
+        "z": "44b97e77d42e5fa9",
+        "name": "整理dashboard資料",
+        "func": "let data = msg.payload;\n\n// 如果 mqtt in 後面沒有接 json，這裡可以保險轉換\nif (typeof data === \"string\") {\n    try {\n        data = JSON.parse(data);\n    } catch (e) {\n        node.warn(\"收到的資料不是合法 JSON：\" + data);\n        return null;\n    }\n}\n\n// 檢查必要欄位\nif (!data.location_id || !data.status) {\n    node.warn(\"缺少 location_id 或 status\");\n    return null;\n}\n\n// 儲存每個地點最後狀態\nflow.set(data.location_id + \"_status\", data.status);\nflow.set(data.location_id + \"_device\", data.device_id);\nflow.set(data.location_id + \"_name\", data.location_name);\nflow.set(data.location_id + \"_message\", data.message);\n\n// 只有 triggered 或 normal 才更新「發生時間」\n// resolved 不要覆蓋發生時間\nif (data.status === \"triggered\" || data.status === \"normal\") {\n    flow.set(data.location_id + \"_time\", data.timestamp);\n}\n\n// 從 flow 取出原本的發生時間\nlet eventTime = flow.get(data.location_id + \"_time\") || data.timestamp || \"無資料\";\n\n// 處理完成時間\nlet resolvedTime = \"尚未處理\";\n\nif (data.status === \"resolved\") {\n    resolvedTime = data.resolved_time || data.timestamp || \"尚未處理\";\n}\n\n// 發生時間只取 HH:MM:SS\nlet eventTimeOnly = \"無資料\";\n\nif (eventTime && eventTime.length >= 19) {\n    eventTimeOnly = eventTime.substring(11, 19);\n}\n\n// 狀態設定\nlet statusText = \"\";\nlet statusIcon = \"\";\nlet statusColor = \"\";\nlet bgColor = \"\";\nlet borderColor = \"\";\n\nif (data.status === \"triggered\") {\n    statusText = \"警報中\";\n    statusIcon = \"🚨\";\n    statusColor = \"#c62828\";\n    bgColor = \"#ffebee\";\n    borderColor = \"#ef5350\";\n} else if (data.status === \"resolved\") {\n    statusText = \"已處理\";\n    statusIcon = \"✅\";\n    statusColor = \"#2e7d32\";\n    bgColor = \"#e8f5e9\";\n    borderColor = \"#66bb6a\";\n} else if (data.status === \"normal\") {\n    statusText = \"未發生事件\";\n    statusIcon = \"⚪\";\n    statusColor = \"#333333\";\n    bgColor = \"#eeeeee\";\n    borderColor = \"#999999\";\n} else {\n    statusText = \"未知狀態\";\n    statusIcon = \"⚠️\";\n    statusColor = \"#555555\";\n    bgColor = \"#eeeeee\";\n    borderColor = \"#999999\";\n}\n\n// 整理給 dashboard 用的資料\nmsg.payload = {\n    event_id: data.event_id || \"無資料\",\n    location_id: data.location_id,\n    location_name: data.location_name || \"無資料\",\n    device_id: data.device_id || \"無資料\",\n    status: data.status || \"無資料\",\n    statusText: statusText,\n    statusIcon: statusIcon,\n    statusColor: statusColor,\n    bgColor: bgColor,\n    borderColor: borderColor,\n    message: data.message || \"目前沒有事件\",\n\n    // 這個是原本事件發生時間\n    timestamp: eventTime,\n\n    // 這個是處理完成時間\n    resolved_time: resolvedTime,\n    resolvedTime: resolvedTime,\n\n    // 這個給 dashboard 顯示 HH:MM:SS\n    timeOnly: eventTimeOnly\n};\n\n// 分流給不同 dashboard\nif (data.location_id === \"lab\") {\n    return [msg, null];\n}\n\nif (data.location_id === \"dorm\") {\n    return [null, msg];\n}\n\nnode.warn(\"未知的 location_id：\" + data.location_id);\nreturn null;",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 160,
+        "wires": [
+            [
+                "0eb8de5a52bd6388"
+            ],
+            [
+                "4ad35ede1e6ddb82"
+            ]
+        ]
+    },
+    {
+        "id": "0eb8de5a52bd6388",
+        "type": "ui-template",
+        "z": "44b97e77d42e5fa9",
+        "group": "444ddd09bbfbfd7e",
+        "page": "",
+        "ui": "",
+        "name": "事件狀態卡片",
+        "order": 0,
+        "width": "6",
+        "height": "11",
+        "head": "",
+        "format": "<template>\n    <div class=\"emergency-card\" :style=\"cardStyle\">\n\n        <div class=\"header\">\n            <div class=\"icon\">{{ statusIcon }}</div>\n            <div class=\"status-text\" :style=\"{ color: statusColor }\">\n                {{ statusText }}\n            </div>\n        </div>\n\n        <div class=\"info-box\">\n            <div class=\"row\">\n                <span class=\"label\">📍 事件地點</span>\n                <span class=\"value\">{{ locationName }}</span>\n            </div>\n\n            <div class=\"row\">\n                <span class=\"label\">⏰ 發生時間</span>\n                <span class=\"value\">{{ displayTime }}</span>\n            </div>\n\n            <div class=\"row\">\n                <span class=\"label\">✅ 處理完成時間</span>\n                <span class=\"value\">{{msg.payload.resolved_time}}</span>\n            </div>\n            \n            <div class=\"row\">\n                <span class=\"label\">💻 設備名稱</span>\n                <span class=\"value\">{{ deviceId }}</span>\n            </div>\n\n            <div class=\"row\">\n                <span class=\"label\">📌 事件狀態</span>\n                <span class=\"value\">{{ rawStatus }}</span>\n            </div>\n\n            <hr>\n\n            <div class=\"message\">\n                <div class=\"label\">💬 事件訊息</div>\n                <div class=\"message-text\">{{ message }}</div>\n            </div>\n        </div>\n\n        <div class=\"event-id\">\n            Event ID：{{ eventId }}\n        </div>\n\n    </div>\n</template>\n\n<script>\nexport default {\n    computed: {\n        data() {\n            return this.msg?.payload || {}\n        },\n\n        rawStatus() {\n            return this.data.status || 'normal'\n        },\n\n        statusText() {\n            return this.data.statusText || '未發生事件'\n        },\n\n        statusIcon() {\n            return this.data.statusIcon || '⚪'\n        },\n\n        statusColor() {\n            return this.data.statusColor || '#333333'\n        },\n\n        bgColor() {\n            return this.data.bgColor || '#eeeeee'\n        },\n\n        borderColor() {\n            return this.data.borderColor || '#999999'\n        },\n\n        cardStyle() {\n            return {\n                backgroundColor: this.bgColor,\n                borderColor: this.borderColor\n            }\n        },\n\n        locationName() {\n            return this.data.location_name || '尚無資料'\n        },\n\n        deviceId() {\n            return this.data.device_id || '尚無資料'\n        },\n\n        message() {\n            return this.data.message || '目前沒有事件'\n        },\n\n        eventId() {\n            return this.data.event_id || '尚無事件編號'\n        },\n\n        displayTime() {\n            return this.data.timeOnly || '尚無時間'\n        }\n    }\n}\n</script>\n\n<style>\n.emergency-card {\n    font-family: \"Microsoft JhengHei\", Arial, sans-serif;\n    padding: 24px;\n    border-radius: 20px;\n    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);\n    border: 3px solid #cccccc;\n    margin: 12px;\n}\n\n.header {\n    text-align: center;\n    margin-bottom: 20px;\n}\n\n.icon {\n    font-size: 50px;\n}\n\n.status-text {\n    font-size: 36px;\n    font-weight: bold;\n    margin-top: 8px;\n}\n\n.info-box {\n    background: white;\n    border-radius: 14px;\n    padding: 18px 24px;\n    font-size: 20px;\n}\n\n.row {\n    display: flex;\n    justify-content: space-between;\n    margin: 12px 0;\n}\n\n.label {\n    color: #555555;\n}\n\n.value {\n    font-weight: bold;\n    color: #111111;\n}\n\n.message {\n    margin-top: 15px;\n}\n\n.message-text {\n    margin-top: 8px;\n    font-size: 22px;\n    font-weight: bold;\n    color: #111111;\n}\n\n.event-id {\n    margin-top: 15px;\n    text-align: center;\n    font-size: 13px;\n    color: #666666;\n}\n</style>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 960,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bae635854a3cc772",
+        "type": "function",
+        "z": "44b97e77d42e5fa9",
+        "name": "resolve lab",
+        "func": "let now = new Date();\n\nmsg.payload = {\n    location_id: \"lab\",\n    location_name: \"70404 教室\",\n    status: \"resolved\",\n    timestamp: now.toLocaleString(\"zh-TW\", { hour12: false }),\n    device_id: \"dashboard\",\n    event_type: \"Emergency\",\n    message: \"70404 教室 緊急事件已處理完成\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 730,
+        "y": 360,
+        "wires": [
+            [
+                "54ea5be5779761dc"
+            ]
+        ]
+    },
+    {
+        "id": "54ea5be5779761dc",
+        "type": "mqtt out",
+        "z": "44b97e77d42e5fa9",
+        "name": "",
+        "topic": "final",
+        "qos": "1",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "dddb1820327cb91a",
+        "x": 890,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "ebcbbb36a36f0e33",
+        "type": "function",
+        "z": "44b97e77d42e5fa9",
+        "name": "resolve dorm",
+        "func": "let now = new Date();\n\nmsg.payload = {\n    location_id: \"dorm\",\n    location_name: \"Dorm 宿舍\",\n    status: \"resolved\",\n    timestamp: now.toLocaleString(\"zh-TW\", { hour12: false }),\n    device_id: \"dashboard\",\n    event_type: \"Emergency\",\n    message: \"Dorm 宿舍 緊急事件已處理完成\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 730,
+        "y": 440,
+        "wires": [
+            [
+                "c5a61598acef2642"
+            ]
+        ]
+    },
+    {
+        "id": "c5a61598acef2642",
+        "type": "mqtt out",
+        "z": "44b97e77d42e5fa9",
+        "name": "",
+        "topic": "final",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "dddb1820327cb91a",
+        "x": 890,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "4ad35ede1e6ddb82",
+        "type": "ui-template",
+        "z": "44b97e77d42e5fa9",
+        "group": "444ddd09bbfbfd7e",
+        "page": "",
+        "ui": "",
+        "name": "事件狀態卡片",
+        "order": 0,
+        "width": "6",
+        "height": "11",
+        "head": "",
+        "format": "<template>\n    <div class=\"emergency-card\" :style=\"cardStyle\">\n\n        <div class=\"header\">\n            <div class=\"icon\">{{ statusIcon }}</div>\n            <div class=\"status-text\" :style=\"{ color: statusColor }\">\n                {{ statusText }}\n            </div>\n        </div>\n\n        <div class=\"info-box\">\n            <div class=\"row\">\n                <span class=\"label\">📍 事件地點</span>\n                <span class=\"value\">{{ locationName }}</span>\n            </div>\n\n            <div class=\"row\">\n                <span class=\"label\">⏰ 發生時間</span>\n                <span class=\"value\">{{ displayTime }}</span>\n            </div>\n            \n            <div class=\"row\">\n                <span class=\"label\">✅ 處理完成時間</span>\n                <span class=\"value\">{{msg.payload.resolved_time}}</span>\n            </div>\n            \n            <div class=\"row\">\n                <span class=\"label\">💻 設備名稱</span>\n                <span class=\"value\">{{ deviceId }}</span>\n            </div>\n\n            <div class=\"row\">\n                <span class=\"label\">📌 事件狀態</span>\n                <span class=\"value\">{{ rawStatus }}</span>\n            </div>\n\n            <hr>\n\n            <div class=\"message\">\n                <div class=\"label\">💬 事件訊息</div>\n                <div class=\"message-text\">{{ message }}</div>\n            </div>\n        </div>\n\n        <div class=\"event-id\">\n            Event ID：{{ eventId }}\n        </div>\n\n    </div>\n</template>\n\n<script>\nexport default {\n    computed: {\n        data() {\n            return this.msg?.payload || {}\n        },\n\n        rawStatus() {\n            return this.data.status || 'normal'\n        },\n\n        statusText() {\n            return this.data.statusText || '未發生事件'\n        },\n\n        statusIcon() {\n            return this.data.statusIcon || '⚪'\n        },\n\n        statusColor() {\n            return this.data.statusColor || '#333333'\n        },\n\n        bgColor() {\n            return this.data.bgColor || '#eeeeee'\n        },\n\n        borderColor() {\n            return this.data.borderColor || '#999999'\n        },\n\n        cardStyle() {\n            return {\n                backgroundColor: this.bgColor,\n                borderColor: this.borderColor\n            }\n        },\n\n        locationName() {\n            return this.data.location_name || '尚無資料'\n        },\n\n        deviceId() {\n            return this.data.device_id || '尚無資料'\n        },\n\n        message() {\n            return this.data.message || '目前沒有事件'\n        },\n\n        eventId() {\n            return this.data.event_id || '尚無事件編號'\n        },\n\n        displayTime() {\n            return this.data.timeOnly || '尚無時間'\n        }\n    }\n}\n</script>\n\n<style>\n.emergency-card {\n    font-family: \"Microsoft JhengHei\", Arial, sans-serif;\n    padding: 24px;\n    border-radius: 20px;\n    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);\n    border: 3px solid #cccccc;\n    margin: 12px;\n}\n\n.header {\n    text-align: center;\n    margin-bottom: 20px;\n}\n\n.icon {\n    font-size: 50px;\n}\n\n.status-text {\n    font-size: 36px;\n    font-weight: bold;\n    margin-top: 8px;\n}\n\n.info-box {\n    background: white;\n    border-radius: 14px;\n    padding: 18px 24px;\n    font-size: 20px;\n}\n\n.row {\n    display: flex;\n    justify-content: space-between;\n    margin: 12px 0;\n}\n\n.label {\n    color: #555555;\n}\n\n.value {\n    font-weight: bold;\n    color: #111111;\n}\n\n.message {\n    margin-top: 15px;\n}\n\n.message-text {\n    margin-top: 8px;\n    font-size: 22px;\n    font-weight: bold;\n    color: #111111;\n}\n\n.event-id {\n    margin-top: 15px;\n    text-align: center;\n    font-size: 13px;\n    color: #666666;\n}\n</style>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 960,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1fa05262188a3651",
+        "type": "ui-button",
+        "z": "44b97e77d42e5fa9",
+        "group": "444ddd09bbfbfd7e",
+        "name": "教室事件已解決",
+        "label": "教室事件已解決",
+        "order": 0,
+        "width": "6",
+        "height": "3",
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 400,
+        "y": 360,
+        "wires": [
+            [
+                "2eeda9dcdbcff658"
+            ]
+        ]
+    },
+    {
+        "id": "73ed218fde38fb1a",
+        "type": "ui-button",
+        "z": "44b97e77d42e5fa9",
+        "group": "444ddd09bbfbfd7e",
+        "name": "宿舍事件已解決",
+        "label": "宿舍事件已解決",
+        "order": 0,
+        "width": "6",
+        "height": "3",
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 400,
+        "y": 440,
+        "wires": [
+            [
+                "b121afb8913ef522"
+            ]
+        ]
+    },
+    {
+        "id": "2eeda9dcdbcff658",
+        "type": "ui-template",
+        "z": "44b97e77d42e5fa9",
+        "group": "444ddd09bbfbfd7e",
+        "page": "",
+        "ui": "",
+        "name": "",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "head": "",
+        "format": "<style>\n/* 調整 dashboard button 的文字大小 */\n.nr-dashboard-button .md-button {\n    font-size: 24px !important;\n    font-weight: bold !important;\n}\n\n/* 調整按鈕高度 */\n.nr-dashboard-button {\n    height: 80px !important;\n}\n\n/* 讓按鈕文字置中 */\n.nr-dashboard-button .md-button span {\n    font-size: 30px !important;\n    font-weight: bold !important;\n}\n</style>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 560,
+        "y": 360,
+        "wires": [
+            [
+                "bae635854a3cc772"
+            ]
+        ]
+    },
+    {
+        "id": "b121afb8913ef522",
+        "type": "ui-template",
+        "z": "44b97e77d42e5fa9",
+        "group": "444ddd09bbfbfd7e",
+        "page": "",
+        "ui": "",
+        "name": "",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "head": "",
+        "format": "<style>\n/* 調整 dashboard button 的文字大小 */\n.nr-dashboard-button .md-button {\n    font-size: 24px !important;\n    font-weight: bold !important;\n}\n\n/* 調整按鈕高度 */\n.nr-dashboard-button {\n    height: 80px !important;\n}\n\n/* 讓按鈕文字置中 */\n.nr-dashboard-button .md-button span {\n    font-size: 30 px !important;\n    font-weight: bold !important;\n}\n</style>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 560,
+        "y": 440,
+        "wires": [
+            [
+                "ebcbbb36a36f0e33"
+            ]
+        ]
+    },
+    {
+        "id": "dddb1820327cb91a",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "rpi5-16.local",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "5",
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "444ddd09bbfbfd7e",
+        "type": "ui-group",
+        "name": "status",
+        "page": "67edd63ffa236a41",
+        "width": "12",
+        "height": 1,
+        "order": -1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "67edd63ffa236a41",
+        "type": "ui-page",
+        "name": "emergeny system",
+        "ui": "3a1077882da5e9ac",
+        "path": "/page2",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "d09c12ca6547e319",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": -1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "3a1077882da5e9ac",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false
+    },
+    {
+        "id": "d09c12ca6547e319",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "d00a7c9f7d2aa4ea",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@flowfuse/node-red-dashboard": "1.30.2"
+        }
+    }
+]
