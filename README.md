@@ -33,7 +33,7 @@ LINE_CHANNEL_ACCESS_TOKEN=在這裡貼上你的長期 token
 
 LINE_USER_ID=在這裡貼上你的測試用 userId 或群組 Id
 
-可以參照以下的指令步驟去找尋Channel access token和user id
+可以參照老師授課講義第10章的講義去找尋Channel access token和user id
 
 <img width="785" height="437" alt="image" src="https://github.com/user-attachments/assets/9535a6be-728a-422e-b695-a2c70e1a20c9" />
 <img width="680" height="425" alt="image" src="https://github.com/user-attachments/assets/a3c54bd3-a09f-4c9c-bd0c-7ca0b0b56bdf" />
@@ -42,7 +42,7 @@ LINE_USER_ID=在這裡貼上你的測試用 userId 或群組 Id
 接下來我們只需要去執行vscode之中Group_16_final.py這個程式再去Node-RED中按部署確認mqtt有順利連接到樹梅派，當順利連接到Node-RED之後我們可以到http://rpi5-XX.local:1880/dashboard/page2 這個網站去看我們的Dashboard(其中XX的位址要換成自己組別的樹梅派編號，或是從rpi5到冒號之前可以替換成自己樹梅派的ip address)
 
 ### 模擬流程(系統執行流程)
-當Dashboard可以順利顯示出未發生事件的畫面時，我們就可以按按鈕來模擬此套系統如何運作。首先，我們可以將電路板的對應GPIO27的按鈕按下，此時表示"Dorm發生緊急事件"，而電路板中對應GPIO20的LED也會隨之亮起，且dashboard和Line Bot也會同時收到Dorm發生緊急事件(包含發生時間、地點、設備名稱及事件狀態)dashboard宿舍欄位也會亮紅燈。
+當Dashboard可以順利顯示出未發生事件的畫面時，我們就可以按按鈕來模擬此套系統如何運作。首先，我們可以將電路板的對應GPIO27的按鈕按下，此時表示"Dorm發生緊急事件"，而電路板中對應GPIO20的LED也會隨之亮起，且dashboard和Line Bot也會同時收到Dorm發生緊急事件(包含事件發生時間、地點、設備名稱及事件狀態)dashboard宿舍欄位也會亮紅燈。
 
 接下來管理員可以開始去處理事件，當處理完成即可按下Dashboard中的"宿舍事件已解決"按鈕，此時電路板的LED燈會隨之熄滅，Dashboard的宿舍事件也會由亮紅燈轉為綠燈
-vscode終端機則會出現"宿舍事件已解決"的訊息，並包含時間、設備、地點等訊息。
+vscode終端機則會出現"宿舍事件已解決"的訊息，並包含管理員解決事件的時間、設備、地點等訊息。
