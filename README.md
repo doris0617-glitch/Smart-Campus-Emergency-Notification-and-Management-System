@@ -4,6 +4,9 @@ AIoT emergency notification system using Raspberry Pi, Node-RED, and LINE Bot.
 我們所設計的期末專題是智慧校園緊急事件通報與管理系統
 
 在開始執行程式前我們需要先安裝會用到的一些套件
+<img width="527" height="262" alt="image" src="https://github.com/user-attachments/assets/e5ace9db-757d-4795-bc52-8b12edcf9e18" />
+<img width="556" height="221" alt="image" src="https://github.com/user-attachments/assets/b3a5bdb4-2c93-4556-a69a-165ebcb143c4" />
+<img width="327" height="171" alt="image" src="https://github.com/user-attachments/assets/a694cc4b-ac18-40a4-9ce1-c62155a3d17d" />
 
 GPIO接腳如下
 
@@ -24,8 +27,11 @@ LINE_CHANNEL_ACCESS_TOKEN=在這裡貼上你的長期 token
 
 LINE_USER_ID=在這裡貼上你的測試用 userId 或群組 Id
 
-我們需要按照授課講義第10章的 https://developers.line.biz/en/services/messaging-api/這個連結
-並參照講義11-12頁的步驟去找尋自己的長期的token跟userId
+可以參照以下的指令步驟去找尋Channel access token和user id
+
+<img width="785" height="437" alt="image" src="https://github.com/user-attachments/assets/9535a6be-728a-422e-b695-a2c70e1a20c9" />
+<img width="680" height="425" alt="image" src="https://github.com/user-attachments/assets/a3c54bd3-a09f-4c9c-bd0c-7ca0b0b56bdf" />
+
 
 接下來我們只需要去執行vscode之中Group_16_final.py這個程式再去Node-RED中按部屬確認mqtt有順利連接到樹梅派，當順利連接到Node-RED之後我們可以到http://rpi5-**.local:1880/dashboard/page2 這個網站去看我們的Dashboard(其中*的位址要換成自己組別的樹梅派編號，或是從rpi5到冒號之前可以替換成自己樹梅派的ip address)
 
