@@ -4,6 +4,10 @@
 
 當教室或宿舍發生緊急事件時，使用者可以按下對應的實體按鈕。Raspberry Pi 偵測到按鈕觸發後，會立即點亮對應 LED，並透過 MQTT 將事件資料傳送至 Node-RED Dashboard，同時透過 LINE Bot 發送緊急通知給管理員。管理員處理完成後，可在 Dashboard 按下「事件已解決」按鈕，系統會更新事件狀態並關閉對應 LED。
 
+### 系統架構圖如下
+
+<img width="361" height="641" alt="image" src="https://github.com/user-attachments/assets/951c1429-9080-4ea7-9c89-74bef757d3c9" />
+
 
 ### 在開始執行程式前我們需要先安裝會用到的一些套件
 
