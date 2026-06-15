@@ -2,8 +2,21 @@
 AIoT emergency notification system using Raspberry Pi, Node-RED, and LINE Bot.
 
 我們所設計的期末專題是智慧校園緊急事件通報與管理系統
+
+在開始執行程式前我們需要先安裝會用到的一些套件
+
+GPIO接腳如下
+
+<img width="502" height="383" alt="image" src="https://github.com/user-attachments/assets/c9757fd7-2e2c-4079-8d53-c198a2705c4e" />
+
+電路圖與LED, Button所對應的接腳
+
+<img width="518" height="432" alt="image" src="https://github.com/user-attachments/assets/e75bb0a5-f4b1-4408-98be-1e357328bbe5" />
+
+
 總共有3個上傳的檔案，分別是Group_16_final.py、empty.env、flows.json三個檔案
 首先我們可以將Grpup_16.py與empty.env這兩個檔案載入到vscode中，再將flows.json載入到Node-RED中
+
 
 其中empty.env之中會有兩行程式如下
 
