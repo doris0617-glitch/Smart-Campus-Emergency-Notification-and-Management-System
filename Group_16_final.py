@@ -5,9 +5,7 @@ import json
 import socket
 import paho.mqtt.client as mqtt
 
-# =========================
-# LINE 新增
-# =========================
+# LINE 
 import os
 import sys
 import requests
@@ -21,7 +19,7 @@ LINE_USER_ID = os.getenv("LINE_USER_ID")
 
 LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push"
 
-# 如果 LINE 沒設定好，不讓整個系統中斷，只是提醒
+# Line沒設定好，提醒使用者
 LINE_ENABLE = True
 
 if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_USER_ID:
@@ -29,20 +27,15 @@ if not LINE_CHANNEL_ACCESS_TOKEN or not LINE_USER_ID:
     print("系統仍會繼續執行，但不會發送 LINE 訊息")
     LINE_ENABLE = False
 
-
-# ==================================================
 # MQTT 設定
-# ==================================================
 
-MQTT_BROKER = "rpi5-16.local"
+MQTT_BROKER = "rpi5-16.local"  # 填入自己的樹梅派名稱或ip address
 MQTT_PORT = 1883
-MQTT_TOPIC = "final"
+MQTT_TOPIC = "final"  # 填入自己的topic
 
 mqtt_client = mqtt.Client(client_id="rpi5_emergency_system")
 
-# ==================================================
 # GPIO 設定
-# ==================================================
 
 # 緊急事件按鈕
 btn_lab = Button(17, pull_up=True, bounce_time=0.2)
@@ -54,9 +47,7 @@ led_dorm = LED(20)
 
 DEVICE_ID = socket.gethostname()
 
-# ==================================================
 # 狀態管理
-# ==================================================
 
 location_status = {
     "lab": "normal",
@@ -68,17 +59,13 @@ location_names = {
     "dorm": "Dorm 宿舍"
 }
 
-# ==================================================
 # 時間
-# ==================================================
 
 def get_timestamp():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-# ==================================================
 # LINE 發送訊息
-# ==================================================
 
 def send_line_message(text):
 
@@ -119,16 +106,11 @@ def send_line_message(text):
         print("LINE send error:", e)
 
 
-# ==================================================
 # 建立事件 JSON
-# ==================================================
 
 def create_event(location_id, status):
-
     timestamp = get_timestamp()
-
     location_name = location_names[location_id]
-
     event_id = f"{location_id}_{timestamp.replace(' ', '_').replace(':', '')}"
 
     # 狀態訊息
@@ -159,9 +141,7 @@ def create_event(location_id, status):
     return event
 
 
-# ==================================================
 # LED 控制
-# ==================================================
 
 def update_led(location_id):
 
@@ -180,16 +160,13 @@ def update_led(location_id):
             led_dorm.off()
 
 
-# ==================================================
+
 # 發送 MQTT
-# ==================================================
+
 
 def publish_to_mqtt(event):
-
     try:
-
         payload = json.dumps(event, ensure_ascii=False)
-
         result = mqtt_client.publish(
             MQTT_TOPIC,
             payload,
@@ -198,12 +175,9 @@ def publish_to_mqtt(event):
         )
 
         if result.rc == mqtt.MQTT_ERR_SUCCESS:
-
             print("\nMQTT Publish Success")
             print("Topic:", MQTT_TOPIC)
-
             print(json.dumps(event, ensure_ascii=False, indent=2))
-
         else:
             print("MQTT publish failed")
 
@@ -211,17 +185,13 @@ def publish_to_mqtt(event):
         print("MQTT publish error:", e)
 
 
-# ==================================================
 # 緊急事件處理
-# ==================================================
+
 
 def handle_emergency(location_id):
-
     location_name = location_names[location_id]
-
     # 避免重複觸發
     if location_status[location_id] == "triggered":
-
         print(f"{location_name} 已經是警報中")
         return
 
@@ -250,14 +220,11 @@ def handle_emergency(location_id):
     send_line_message(line_text)
 
 
-# ==================================================
 # 接收 MQTT（Dashboard Resolve）
-# ==================================================
+
 
 def on_message(client, userdata, msg):
-
     try:
-
         payload = json.loads(msg.payload.decode())
 
         location_id = payload.get("location_id")
@@ -266,12 +233,11 @@ def on_message(client, userdata, msg):
 
         # 只處理 resolved
         if status == "resolved":
-
+            
             # 如果這個 resolved 已經有 resolved_time，
             # 代表它可能是 Python 自己剛剛 publish 出去的，不要再重複處理
             if payload.get("resolved_time"):
                 return
-
             print(f"\n{location_id} resolved from dashboard")
 
             # 更新狀態
@@ -291,71 +257,53 @@ def on_message(client, userdata, msg):
         print("MQTT receive error:", e)
 
 
-# ==================================================
 # MQTT Connect
-# ==================================================
+
 
 def on_connect(client, userdata, flags, rc):
-
     if rc == 0:
-
         print("MQTT connected successfully")
 
         # 訂閱 topic
         client.subscribe(MQTT_TOPIC)
-
         print("Subscribed to:", MQTT_TOPIC)
-
     else:
         print("MQTT connection failed")
-
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 
-# ==================================================
+
 # 啟動 MQTT
-# ==================================================
+
 
 try:
-
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-
     mqtt_client.loop_start()
 
 except Exception as e:
-
     print("MQTT connection error:", e)
 
 
-# ==================================================
+
 # 初始狀態
-# ==================================================
+
 
 def publish_initial_status():
-
     for location_id in location_status:
-
         location_status[location_id] = "normal"
-
         update_led(location_id)
-
         event = create_event(location_id, "normal")
-
         publish_to_mqtt(event)
 
-# ==================================================
+
 # GPIO Button 綁定
-# ==================================================
 
 btn_lab.when_pressed = lambda: handle_emergency("lab")
-
 btn_dorm.when_pressed = lambda: handle_emergency("dorm")
 
 
-# ==================================================
 # 系統啟動
-# ==================================================
 
 print("\n===================================")
 print("AIoT Emergency System Started")
@@ -368,7 +316,6 @@ print("GPIO21 → 教室 LED")
 print("GPIO20 → 宿舍 LED")
 
 print("MQTT Topic:", MQTT_TOPIC)
-
 print("Waiting for emergency buttons...\n")
 
 # 初始化 dashboard 狀態
