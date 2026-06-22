@@ -10,10 +10,32 @@
 
 
 ### 在開始執行程式前我們需要先安裝會用到的一些套件
+#### 樹梅派連接方式
+先ping rpi5-XX.local(確保連線成功)  
+再輸入 “名稱@rpi5-XX.local”，確認密碼並成功連線 
 
-<img width="527" height="262" alt="image" src="https://github.com/user-attachments/assets/e5ace9db-757d-4795-bc52-8b12edcf9e18" />
-<img width="586" height="203" alt="image" src="https://github.com/user-attachments/assets/495a31a7-c579-4121-bd8a-9c01b6d34203" />
-<img width="647" height="217" alt="image" src="https://github.com/user-attachments/assets/ac835c28-8c71-41f6-a667-94b689a5b19b" />
+#### 當我們成功連線到樹梅派之後要在終端機輸入以下指令、創建資料夾並進入虛擬環境
+cd ~/workspace  
+mkdir final (final 為我們自己取的資料夾名稱)  
+cd final(進入資料夾)  
+python -m venv venv -system-site-packages(創建虛擬環境)  
+
+#### 接下來我們要安裝Node-RED套件，需要輸入的指令如下(終端機不用進入workspace 和虛擬環境)
+bash <(curl -sL https://github.com/node-red/linux installers/releases/latest/download/update-nodejs-and-nodered-deb)  
+再透過網址打開Node-RED: http://rpi5-XX.local:1880 (XX 可以替換成自己組別)  
+如果打不開可以嘗試利用IP address打開，網址如下: http://ip address:1880 (ip address 需替換成自己樹梅派對應的ip address)
+
+#### 再來，我們需要安裝lgpio套件，需要輸入的指令如下(在虛擬環境下)
+source venv/bin/activate (進入虛擬環境)  
+sudo apt update  
+
+
+<img width="398" height="113" alt="image" src="https://github.com/user-attachments/assets/32ba60f4-e696-4636-9381-fab2af5f542d" />  
+<img width="590" height="222" alt="image" src="https://github.com/user-attachments/assets/7f2cde7b-5c64-447e-8680-a5ae490ede86" />
+<img width="592" height="257" alt="image" src="https://github.com/user-attachments/assets/588786e5-53ab-49c6-beb5-ac06a2359513" />
+<img width="540" height="242" alt="image" src="https://github.com/user-attachments/assets/fe60631f-e5a3-40f3-ba88-d9794c306a8b" />
+<img width="527" height="277" alt="image" src="https://github.com/user-attachments/assets/632e77bc-d91c-44e6-9591-d52698749151" />
+
 <img width="341" height="177" alt="image" src="https://github.com/user-attachments/assets/037e8510-09bd-4c7b-bc70-14e13df12b15" />
 
 
@@ -27,7 +49,7 @@
 
 
 ### 開始匯入檔案
-總共有3個上傳的檔案，分別是Group_16_final.py、empty.env、flows.json三個檔案
+總共有3個上傳的檔案，分別是Group_16_final.py、empty.env、flows.json三個檔案  
 首先我們可以將Grpup_16.py與empty.env這兩個檔案載入到vscode中，再將flows.json載入到Node-RED中
 
 
