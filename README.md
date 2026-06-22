@@ -64,9 +64,11 @@ pip list
 LINE_CHANNEL_ACCESS_TOKEN=在這裡貼上你的長期 token  
 LINE_USER_ID=在這裡貼上你的測試用 userId 或群組 Id
 
-可以參照老師授課講義第10章的講義去找尋Channel access token和user id
 
-### 找Channel Access Token 
+去此連結並按照以下步驟去找Channel Access Token 和 User ID  
+https://developers.line.biz/en/services/messaging-api/
+
+#### Find Your Channel Access Token 
 1. Go to the LINE Developers Console.
 2. Click your Provider.
 3. Click the Messaging API Channel in your Provider.
@@ -75,7 +77,7 @@ LINE_USER_ID=在這裡貼上你的測試用 userId 或群組 Id
 6. Click "Issue" button to generate the channel access token.
 7.  Now you can copy it and paste it to the .env file.
 
-### 找Your User ID
+#### Find Your User ID
 1. Go to the LINE Developers Console.
 2. Click your Provider.
 3. Click the Messaging API Channel in your Provider.
