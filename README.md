@@ -61,15 +61,27 @@ pip list
 
 其中empty.env之中會有兩行程式如下（使用時請將黨名由empty.env改成.env）
 
-LINE_CHANNEL_ACCESS_TOKEN=在這裡貼上你的長期 token
-
+LINE_CHANNEL_ACCESS_TOKEN=在這裡貼上你的長期 token  
 LINE_USER_ID=在這裡貼上你的測試用 userId 或群組 Id
 
 可以參照老師授課講義第10章的講義去找尋Channel access token和user id
 
-<img width="785" height="437" alt="image" src="https://github.com/user-attachments/assets/9535a6be-728a-422e-b695-a2c70e1a20c9" />
-<img width="680" height="425" alt="image" src="https://github.com/user-attachments/assets/a3c54bd3-a09f-4c9c-bd0c-7ca0b0b56bdf" />
+### 找Channel Access Token
+1. Go to the LINE Developers Console.
+2. Click your Provider.
+3. Click the Messaging API Channel in your Provider.
+4. Click "Messaging API" tab.
+5. Scroll down to find the channel access token (long-lived).
+6. Click "Issue" button to generate the channel access token.
+7.  Now you can copy it and paste it to the .env file.
 
+### 找Your User ID
+1. Go to the LINE Developers Console.
+2. Click your Provider.
+3. Click the Messaging API Channel in your Provider.
+4. Click "Basic Settings" tab.
+5. Scroll down to find your user ID.
+6.  Now you can copy it and paste it to the .env file.
 
 接下來我們只需要去執行vscode之中Group_16_final.py這個程式再去Node-RED中按部署確認mqtt有順利連接到樹梅派。  
 
