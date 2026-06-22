@@ -66,7 +66,7 @@ LINE_USER_ID=在這裡貼上你的測試用 userId 或群組 Id
 
 可以參照老師授課講義第10章的講義去找尋Channel access token和user id
 
-### 找Channel Access Token
+### 找Channel Access Token 
 1. Go to the LINE Developers Console.
 2. Click your Provider.
 3. Click the Messaging API Channel in your Provider.
