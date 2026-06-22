@@ -9,7 +9,7 @@
 <img width="361" height="641" alt="image" src="https://github.com/user-attachments/assets/951c1429-9080-4ea7-9c89-74bef757d3c9" />
 
 
-### 在開始執行程式前我們需要先安裝會用到的一些套件
+### 在開始執行程式前我們需要先安裝會用到的一些套件  
 #### 樹梅派連接方式
 先ping rpi5-XX.local(確保連線成功)  
 再輸入 “名稱@rpi5-XX.local”，確認密碼並成功連線 
