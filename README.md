@@ -28,16 +28,22 @@ bash <(curl -sL https://github.com/node-red/linux installers/releases/latest/dow
 #### 再來，我們需要安裝lgpio套件，需要輸入的指令如下(在虛擬環境下)
 source venv/bin/activate (進入虛擬環境)  
 sudo apt update  
+sudo apt install swig liblgpio-dev  
+pip install lgpio  
+pip list  
 
+#### 同時我們也需要安裝paho-mqtt套件，指令如下(以下兩種方式擇一) 
+方法(一): 在樹梅派終端機目標資料夾虛擬環境下  
+pip install paho-mqtt  
+方法(二): 利用 PC 的 conda 去安裝paho-mqtt，指令如下  
+conda create -n paho-mqtt python=3  
+conda activate paho-mqtt  
+conda install -c conda-forge paho-mqtt
 
-<img width="398" height="113" alt="image" src="https://github.com/user-attachments/assets/32ba60f4-e696-4636-9381-fab2af5f542d" />  
-<img width="590" height="222" alt="image" src="https://github.com/user-attachments/assets/7f2cde7b-5c64-447e-8680-a5ae490ede86" />
-<img width="592" height="257" alt="image" src="https://github.com/user-attachments/assets/588786e5-53ab-49c6-beb5-ac06a2359513" />
-<img width="540" height="242" alt="image" src="https://github.com/user-attachments/assets/fe60631f-e5a3-40f3-ba88-d9794c306a8b" />
-<img width="527" height="277" alt="image" src="https://github.com/user-attachments/assets/632e77bc-d91c-44e6-9591-d52698749151" />
-
-<img width="341" height="177" alt="image" src="https://github.com/user-attachments/assets/037e8510-09bd-4c7b-bc70-14e13df12b15" />
-
+#### 最後需要安裝Line套件(虛擬環境下)  
+pip install -upgrade pip  
+pip install requests python-dotenv  
+pip list
 
 ### GPIO接腳如下
 
