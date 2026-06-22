@@ -1,5 +1,5 @@
 # Smart-Campus-Emergency-Notification-and-Management-System
-## 專案簡介
+## 專案簡介  
 本專案為「智慧校園緊急事件通報與管理系統」，主要利用 Raspberry Pi、GPIO 按鈕、LED、MQTT、Node-RED Dashboard 與 LINE Bot 建立一套校園緊急事件通知系統。
 
 當教室或宿舍發生緊急事件時，使用者可以按下對應的實體按鈕。Raspberry Pi 偵測到按鈕觸發後，會立即點亮對應 LED，並透過 MQTT 將事件資料傳送至 Node-RED Dashboard，同時透過 LINE Bot 發送緊急通知給管理員。管理員處理完成後，可在 Dashboard 按下「事件已解決」按鈕，系統會更新事件狀態並關閉對應 LED。
