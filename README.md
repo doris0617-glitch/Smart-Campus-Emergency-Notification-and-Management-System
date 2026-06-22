@@ -71,7 +71,8 @@ LINE_USER_ID=在這裡貼上你的測試用 userId 或群組 Id
 <img width="680" height="425" alt="image" src="https://github.com/user-attachments/assets/a3c54bd3-a09f-4c9c-bd0c-7ca0b0b56bdf" />
 
 
-接下來我們只需要去執行vscode之中Group_16_final.py這個程式再去Node-RED中按部署確認mqtt有順利連接到樹梅派  
+接下來我們只需要去執行vscode之中Group_16_final.py這個程式再去Node-RED中按部署確認mqtt有順利連接到樹梅派。  
+
 當順利連接到Node-RED之後我們可以到http://rpi5-XX.local:1880/dashboard/page2 這個網站去看我們的Dashboard(其中XX的位址要換成自己組別的樹梅派編號，或是從rpi5到冒號之前可以替換成自己樹梅派的ip address)
 
 ### 模擬流程(系統執行流程)
